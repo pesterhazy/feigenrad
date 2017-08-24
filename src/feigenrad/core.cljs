@@ -1,6 +1,13 @@
 (ns feigenrad.core
   (:require [goog.object :as gobj]))
 
+;; Demo of using bare React using ES6 classes (without createClass)
+;;
+;; Uses React 16
+;;
+;; h/t Thomas Heller
+;; https://gist.github.com/thheller/7f530b34de1c44589f4e0671e1ef7533#file-es6-class-cljs-L18
+
 (enable-console-print!)
 
 (prn [:foo])
