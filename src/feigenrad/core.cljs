@@ -19,8 +19,7 @@
                  (when construct
                    (construct this))
                  this))]
-     (gobj/extend
-         (.-prototype cmp) js/React.Component.prototype m)
+     (gobj/extend (.-prototype cmp) js/React.Component.prototype m)
 
      (when display-name
        (set! (.-displayName cmp) display-name)
@@ -40,7 +39,7 @@
                       (fn []
                         (this-as this
                           (create-element "div"
-                                          #js{}
+                                          nil
                                           #js[(create-element "div"
                                                               #js{:key 1}
                                                               #js["Counter is " (-> this .-state .-counter)])
@@ -52,7 +51,7 @@
                                                               #js["Click me"])])))}))
 
 (defn run []
-  (js/ReactDOM.render (js/React.createElement my-component) (js/document.getElementById "app")))
+  (js/ReactDOM.render (create-element my-component) (js/document.getElementById "app")))
 
 (run)
 
