@@ -12,27 +12,40 @@
 
 (prn [:foo])
 
-(defn my-component [props context updater]
-  (cljs.core/this-as this
-    (js/React.Component.call this props context updater)
-    ;; anything else you want to set-up. use goog.object/set on this
-    (gobj/extend this #js{"render"
-                          (fn []
-                            (js/React.createElement "div" #js{} #js["Welcome!!"]))})
-    this))
+(defn make-component [m]
+  (let [cmp (fn [props context updater]
+              (cljs.core/this-as this
+                (js/React.Component.call this props context updater)
+                (gobj/set this "state" #js{:counter 0})
+                this))]
+    (gobj/extend (.-prototype cmp) js/React.Component.prototype m)
 
-(gobj/extend
-    (.. my-component -prototype)
-  js/React.Component.prototype)
+    ;; cljs-specific properties on constructor
+    ;; just so (prn my-component) works properly, not actually required
+    (set! (.-cljs$lang$type cmp) true)
+    (set! (.-cljs$lang$ctorStr cmp) "MyComponent") ;; FIXME
+    (set! (.-cljs$lang$ctorPrWriter cmp)
+          (fn [this writer opt]
+            (cljs.core/-write writer "MyComponent")))
+    (set! (.. cmp -prototype -constructor) cmp)))
 
-;; cljs-specific properties on constructor
-;; just so (prn my-component) works properly, not actually required
-(set! (.-cljs$lang$type my-component) true)
-(set! (.-cljs$lang$ctorStr my-component) "MyComponent")
-(set! (.-cljs$lang$ctorPrWriter my-component)
-      (fn [this writer opt]
-        (cljs.core/-write writer "MyComponent")))
-(set! (.. my-component -prototype -constructor) my-component)
+(def create-element js/React.createElement)
+
+(def my-component
+  (make-component #js{:render
+                      (fn []
+                        (this-as this
+                          (create-element "div"
+                                          #js{}
+                                          #js[(create-element "div"
+                                                              #js{:key 1}
+                                                              #js["Counter is " (pr-str (-> this .-state))])
+                                              (create-element "button"
+                                                              #js{:key 2
+                                                                  :onClick #(.setState this
+                                                                                       (fn [old]
+                                                                                         #js{:counter (-> old .-counter inc)}))}
+                                                              #js["Click me"])])))}))
 
 (defn run []
   (js/ReactDOM.render (js/React.createElement my-component) (js/document.getElementById "app")))
