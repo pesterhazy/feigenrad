@@ -4,10 +4,13 @@
 
 (defn presently []
   (js/Promise. (fn [resolve]
-                 (js/setTimeout resolve 1000))))
+                 (js/setTimeout resolve 2000))))
 
 (defn ping []
   (prn ::ping))
+
+(defn abort []
+  (prn ::abort))
 
 (defn start []
   (prn ::start)
@@ -20,7 +23,12 @@
     [:label.control-label {:for "foo"} "Start"]
     [:button#foo.form-control
      {:on-click start}
-     "Start"]]])
+     "Start"]]
+   [:div.form-group
+    [:label.control-label {:for "foo"} "Abort"]
+    [:button#foo.form-control
+     {:on-click abort}
+     "Abort"]]])
 
 (defn run []
   (r/render [root] (js/document.getElementById "app")))
