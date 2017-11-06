@@ -6,6 +6,16 @@
   (js/Promise. (fn [resolve]
                  (js/setTimeout resolve 2000))))
 
+(defn make-signal []
+  (atom false))
+
+(defn check-signal-fn [signal]
+  (fn [v]
+    (when @signal
+      (prn ::cancelled)
+      (throw (js/Error. "Banana")))
+    v))
+
 (defn ping []
   (prn ::ping))
 
@@ -14,8 +24,10 @@
 
 (defn start []
   (prn ::start)
-  (-> (presently)
-      (.then ping)))
+  (let [signal (make-signal)]
+    (-> (presently)
+        (.then (check-signal-fn signal))
+        (.then ping))))
 
 (defn root []
   [:main.container
