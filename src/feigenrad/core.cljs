@@ -18,6 +18,8 @@
   (fn [v]
     (when @signal
       (prn ::canceled)
+      ;; TODO: this should use generated ID to make sure we don't
+      ;; accidentally catch other signals
       (throw #js{:name "AbortSignal" :description "About signal"}))
     v))
 
