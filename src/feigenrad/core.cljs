@@ -6,28 +6,38 @@
   (js/Promise. (fn [resolve]
                  (js/setTimeout resolve 2000))))
 
+(def !signal (atom nil))
+
 (defn make-signal []
   (atom false))
+
+(defn dispatch-signal [signal]
+  (reset! signal true))
 
 (defn check-signal-fn [signal]
   (fn [v]
     (when @signal
-      (prn ::cancelled)
-      (throw (js/Error. "Banana")))
+      (prn ::canceled)
+      (throw #js{:name "AbortSignal" :description "About signal"}))
     v))
 
 (defn ping []
   (prn ::ping))
 
 (defn abort []
-  (prn ::abort))
+  (prn ::abort)
+  (some-> @!signal dispatch-signal))
 
 (defn start []
   (prn ::start)
   (let [signal (make-signal)]
+    (reset! !signal signal)
     (-> (presently)
         (.then (check-signal-fn signal))
-        (.then ping))))
+        (.then ping)
+        (.catch (fn [e]
+                  (when-not (= "AbortSignal" (.-name e))
+                    (throw e)))))))
 
 (defn root []
   [:main.container
